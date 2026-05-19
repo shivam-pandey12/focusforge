@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import OfflineBanner from "@/components/OfflineBanner";
 import PwaRegister from "@/components/PwaRegister";
 import RouteWarmup from "@/components/RouteWarmup";
@@ -50,6 +51,7 @@ export default function RootLayout({
         />
       </head>
       <body className={geistSans.variable}>
+        <GoogleAnalytics />
         <AuthProvider>
           <PwaRegister />
           <RouteWarmup />
