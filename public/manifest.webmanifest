@@ -1,0 +1,31 @@
+{
+  "name": "FocusForge",
+  "short_name": "FocusForge",
+  "description": "Quiet focus. Real progress.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F8F5F0",
+  "theme_color": "#C9A46C",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/focusforge-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/focusforge-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/focusforge-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

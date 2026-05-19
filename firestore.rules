@@ -1,0 +1,303 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownsNewDocument() {
+      return signedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
+    function ownsExistingDocument() {
+      return signedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    function billingProfileFields() {
+      return [
+        "plan",
+        "subscriptionStatus",
+        "billingCycle",
+        "planStartedAt",
+        "planExpiresAt",
+        "trialEndsAt",
+        "cancelAtPeriodEnd",
+        "razorpayCustomerId",
+        "razorpayOrderId",
+        "razorpayPaymentId",
+        "razorpaySubscriptionId",
+        "lastPaymentVerifiedAt"
+      ];
+    }
+
+    function hasActivePaidPlan() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/userProfiles/$(request.auth.uid))
+        && (
+          get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.plan == "pro"
+          || get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.plan == "elite"
+        )
+        && get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.subscriptionStatus != "free"
+        && get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.subscriptionStatus != "inactive"
+        && get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.subscriptionStatus != "expired"
+        && (
+          !get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.keys().hasAny(["planExpiresAt"])
+          || get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.planExpiresAt == null
+          || get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.planExpiresAt > request.time
+        );
+    }
+
+    function hasOnlyDefaultBillingOnCreate() {
+      return (!request.resource.data.keys().hasAny(["plan"]) || request.resource.data.plan == "free")
+        && (!request.resource.data.keys().hasAny(["subscriptionStatus"]) || request.resource.data.subscriptionStatus == "free")
+        && (!request.resource.data.keys().hasAny(["billingCycle"]) || request.resource.data.billingCycle == "none")
+        && (!request.resource.data.keys().hasAny(["planStartedAt"]) || request.resource.data.planStartedAt == null)
+        && (!request.resource.data.keys().hasAny(["planExpiresAt"]) || request.resource.data.planExpiresAt == null)
+        && (!request.resource.data.keys().hasAny(["trialEndsAt"]) || request.resource.data.trialEndsAt == null)
+        && (!request.resource.data.keys().hasAny(["cancelAtPeriodEnd"]) || request.resource.data.cancelAtPeriodEnd == false)
+        && (!request.resource.data.keys().hasAny(["razorpayCustomerId"]) || request.resource.data.razorpayCustomerId == "")
+        && (!request.resource.data.keys().hasAny(["razorpayOrderId"]) || request.resource.data.razorpayOrderId == "")
+        && (!request.resource.data.keys().hasAny(["razorpayPaymentId"]) || request.resource.data.razorpayPaymentId == "")
+        && (!request.resource.data.keys().hasAny(["razorpaySubscriptionId"]) || request.resource.data.razorpaySubscriptionId == "")
+        && (!request.resource.data.keys().hasAny(["lastPaymentVerifiedAt"]) || request.resource.data.lastPaymentVerifiedAt == null);
+    }
+
+    match /users/{userId} {
+      allow read, create, update, delete: if signedIn() && userId == request.auth.uid;
+    }
+
+    match /userProfiles/{userId} {
+      allow create: if signedIn()
+        && userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && hasOnlyDefaultBillingOnCreate();
+      allow update: if signedIn()
+        && userId == request.auth.uid
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(billingProfileFields());
+      allow read: if signedIn() && userId == request.auth.uid;
+      allow delete: if signedIn()
+        && userId == request.auth.uid
+        && resource.data.userId == request.auth.uid;
+    }
+
+    match /tasks/{taskId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /sessions/{sessionId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /notes/{noteId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /assignments/{assignmentId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /examSchedules/{examId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /marksEntries/{entryId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /backlogItems/{itemId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /dailyBattlePlans/{planId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /timetableBlocks/{blockId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /scheduleProfiles/{profileId} {
+      allow create: if ownsNewDocument() && hasActivePaidPlan();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid && hasActivePaidPlan();
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /revisionPlans/{planId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /syllabusSubjects/{subjectId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /syllabusChapters/{chapterId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /syllabusTopics/{topicId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /habits/{habitId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /habitCompletions/{completionId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /mockTests/{testId} {
+      allow create: if ownsNewDocument() && hasActivePaidPlan();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid && hasActivePaidPlan();
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /studyGoals/{goalId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /studyJournals/{entryId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /studyTemplates/{templateId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /dailyReviews/{reviewId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /weeklyReviews/{reviewId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /studyReminders/{reminderId} {
+      allow create: if ownsNewDocument();
+      allow read: if ownsExistingDocument();
+      allow update: if ownsExistingDocument() && request.resource.data.userId == request.auth.uid;
+      allow delete: if ownsExistingDocument();
+    }
+
+    match /supportTickets/{ticketId} {
+      allow read: if ownsExistingDocument();
+      allow create, update, delete: if false;
+    }
+
+    match /feedback/{feedbackId} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /emailEvents/{eventId} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /trafficEvents/{eventId} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /accountDeletionRequests/{userId} {
+      allow create: if signedIn()
+        && userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == "requested";
+      allow read: if signedIn()
+        && userId == request.auth.uid
+        && resource.data.userId == request.auth.uid;
+      allow update: if signedIn()
+        && userId == request.auth.uid
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == "requested";
+      allow delete: if false;
+    }
+
+    match /payments/{paymentId} {
+      allow read: if ownsExistingDocument();
+      allow create, update, delete: if false;
+    }
+
+    match /billingEvents/{eventId} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /subscriptionEvents/{eventId} {
+      allow read, create, update, delete: if false;
+    }
+
+    match /streaks/{userId} {
+      allow create, update: if signedIn()
+        && userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid;
+      allow read: if signedIn() && userId == request.auth.uid;
+      allow delete: if signedIn()
+        && userId == request.auth.uid
+        && resource.data.userId == request.auth.uid;
+    }
+  }
+}

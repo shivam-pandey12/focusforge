@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="FocusForge">
+  <rect width="512" height="512" rx="116" fill="#C9A46C"/>
+  <rect x="64" y="64" width="384" height="384" rx="88" fill="#FFFDF8" opacity="0.18"/>
+  <path d="M157 384V128h208v64H234v45h115v62H234v85h-77Z" fill="#FFFDF8"/>
+</svg>
