@@ -2168,6 +2168,7 @@ main.page-shell > section:first-child:not(.card):not(.card-muted)::after {
   box-shadow: inset 0 0 0 1px rgb(var(--forge-line));
 }
 
+
 .theme-toggle-thumb {
   display: grid;
   height: 1.58rem;
@@ -2445,11 +2446,17 @@ html[data-theme="dark"] .plan-badge-pro {
 
 html[data-theme="dark"] .plan-badge-elite {
   color: rgb(255 244 217);
-  background: rgb(18 18 18);
+  border-color: rgb(var(--forge-gold) / 0.82);
+  background: linear-gradient(135deg, rgb(96 71 35 / 0.94), rgb(38 32 24 / 0.98));
+  box-shadow: 0 10px 24px rgb(var(--forge-gold) / 0.16), inset 0 1px 0 rgb(255 244 217 / 0.12);
 }
 
 html[data-theme="dark"] .side-nav-plan-tag-elite {
-  color: rgb(18 18 18);
+  border-color: rgb(255 226 176 / 0.86);
+  background: linear-gradient(135deg, rgb(var(--forge-gold) / 0.34), rgb(72 52 24 / 0.92));
+  color: rgb(255 244 217);
+  box-shadow: 0 10px 22px rgb(var(--forge-gold) / 0.18), inset 0 1px 0 rgb(255 244 217 / 0.16);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42);
 }
 
 html[data-theme="dark"] .upgrade-prompt,
