@@ -41,10 +41,10 @@ export default function PlanComparisonCard({ plan, currentPlan, loggedIn, billin
       {waitingForPayments ? (
         <>
           <Link className="btn-secondary mt-6 w-full" href={loggedIn ? "/support?category=payment_issue" : "/signup"}>
-            Activation waiting
+            Checkout paused
           </Link>
           <p className="mt-3 text-sm font-semibold leading-6 text-forge-muted">
-            Paid checkout opens after Razorpay live activation. Starter access is available now.
+            Paid checkout is temporarily paused. Starter access is available now.
           </p>
         </>
       ) : loggedIn && plan !== "free" && !current && onUpgrade ? (

@@ -217,7 +217,7 @@ function BillingContent() {
               <article className="card p-6 sm:p-8">
                 <SectionHeader
                   title="Upgrade or change plan"
-                  subtitle={PAYMENTS_ACTIVE ? "Orders are created server-side and verified before access changes." : "Checkout is visible for plan review, but payments are waiting for Razorpay live activation."}
+                  subtitle={PAYMENTS_ACTIVE ? "Orders are created server-side and verified before access changes." : "Checkout is visible for plan review, but payments are temporarily paused."}
                 />
                 <div className="mt-6 grid gap-4">
                   {(["pro", "elite"] as PaidPlanTier[]).map((tier) => (

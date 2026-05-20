@@ -3,7 +3,7 @@ import type { CheckoutBillingCycle, PaidBillingCycle, PaidPlanTier } from "@/lib
 export const BILLING_CURRENCY = "INR";
 export const PAYMENTS_ACTIVE = process.env.NEXT_PUBLIC_PAYMENTS_ACTIVE === "true";
 export const PAYMENT_ACTIVATION_MESSAGE =
-  "Paid checkout is waiting for Razorpay live activation. Starter access is available now, and Pro/Elite checkout will open after payments are activated.";
+  "Paid checkout is temporarily paused while Razorpay configuration is reviewed. Starter access is available now, and Pro/Elite checkout will reopen after payments are enabled.";
 
 export const BILLING_PRICE_CONFIG: Record<PaidPlanTier, Record<PaidBillingCycle, number>> = {
   pro: {

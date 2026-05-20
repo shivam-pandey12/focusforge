@@ -47,8 +47,8 @@ const faqs = [
     answer: "Yes. Forge Starter includes the planner foundation, normal timetable, calendar, focus, revision, reminders, marks, backlog, and a small daily battle plan with clear limits."
   },
   {
-    question: "How are payments activated?",
-    answer: "Paid checkout is currently waiting for Razorpay live activation. Once live keys are available, Razorpay Checkout stays server-verified and the client never grants premium by itself."
+    question: "How are payments verified?",
+    answer: "Razorpay Checkout creates an order from the server, then FocusForge activates Pro or Elite only after server-side payment verification or a verified webhook event."
   },
   {
     question: "What happens if I downgrade?",

@@ -4,12 +4,12 @@ FocusForge is a Next.js student planning and study-execution app using Firebase/
 
 ## Production Status
 
-The app is ready to host with payments in activation-waiting mode.
+The app is ready to host with Razorpay live checkout enabled through server-verified Orders.
 
 - Starter/free app access can run now.
-- Paid checkout is intentionally disabled until Razorpay live activation is available.
+- Paid checkout is controlled by `NEXT_PUBLIC_PAYMENTS_ACTIVE=true`.
 - Contact/support email: `mhhorizonhub@gmail.com`.
-- Razorpay checkout can be enabled later without changing the UI flow.
+- Razorpay verification and webhook handling stay server-authoritative.
 
 ## Local Setup
 
@@ -51,11 +51,7 @@ Support/contact:
 
 - `NEXT_PUBLIC_SUPPORT_EMAIL=mhhorizonhub@gmail.com`
 
-Payments before Razorpay live keys:
-
-- `NEXT_PUBLIC_PAYMENTS_ACTIVE=false`
-
-When Razorpay live keys are ready:
+Razorpay live payments:
 
 - `NEXT_PUBLIC_PAYMENTS_ACTIVE=true`
 - `NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_live_...`
@@ -68,8 +64,8 @@ When Razorpay live keys are ready:
 
 - Do not commit `.env.local`, Firebase service-account JSON, or Razorpay secrets.
 - Deploy Firestore rules and indexes from `firestore.rules` and `firestore.indexes.json`.
-- Keep Razorpay webhooks pointed to `/api/billing/webhook` after live activation.
-- Leave `NEXT_PUBLIC_PAYMENTS_ACTIVE=false` until live payment verification has been tested.
+- Keep Razorpay webhooks pointed to `/api/billing/webhook`.
+- If live payment verification ever needs to be paused, set `NEXT_PUBLIC_PAYMENTS_ACTIVE=false` without deleting user data.
 
 ## Git Push Safety
 
