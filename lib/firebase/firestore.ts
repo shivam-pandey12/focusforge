@@ -2882,20 +2882,40 @@ export function subscribeToDailyBattlePlan(
   onError: (error: string) => void
 ): Unsubscribe {
   const db = ensureFirestoreDb();
-  const planId = getDailyBattlePlanId(userId, date);
+  const planQuery = query(
+    collection(db, "dailyBattlePlans"),
+    where("userId", "==", userId),
+    where("date", "==", date),
+    queryLimit(1)
+  );
 
   return onSnapshot(
-    doc(db, "dailyBattlePlans", planId),
-    (snapshot) => onPlan(snapshot.exists() ? mapDailyBattlePlanDoc(snapshot.id, snapshot.data()) : null),
+    planQuery,
+    (snapshot) => {
+      const planDoc = snapshot.docs[0];
+      onPlan(planDoc ? mapDailyBattlePlanDoc(planDoc.id, planDoc.data()) : null);
+    },
     (error) => onError(getFirestoreErrorMessage(error))
   );
 }
 
 export async function fetchDailyBattlePlan(userId: string, date: string): Promise<DailyBattlePlan | null> {
   const db = ensureFirestoreDb();
-  const snapshot = await getDoc(doc(db, "dailyBattlePlans", getDailyBattlePlanId(userId, date)));
+  const planQuery = query(
+    collection(db, "dailyBattlePlans"),
+    where("userId", "==", userId),
+    where("date", "==", date),
+    queryLimit(1)
+  );
 
-  return snapshot.exists() ? mapDailyBattlePlanDoc(snapshot.id, snapshot.data()) : null;
+  const plans = await timedFirestoreRead("dailyBattlePlans:current", async () => {
+    const snapshot = await getDocs(planQuery);
+    const planDoc = snapshot.docs[0];
+
+    return planDoc ? [mapDailyBattlePlanDoc(planDoc.id, planDoc.data())] : [];
+  });
+
+  return plans[0] ?? null;
 }
 
 export async function fetchDailyBattlePlans(userId: string): Promise<DailyBattlePlan[]> {
@@ -2913,14 +2933,14 @@ export async function saveDailyBattlePlan(userId: string, input: DailyBattlePlan
   const normalized = normalizeDailyBattlePlanInput(input);
   const planId = getDailyBattlePlanId(userId, normalized.date);
   const planRef = doc(db, "dailyBattlePlans", planId);
-  const existing = await getDoc(planRef);
+  const existing = await fetchDailyBattlePlan(userId, normalized.date);
 
   await setDoc(planRef, {
     id: planId,
     userId,
     ...normalized,
     generatedAt: serverTimestamp(),
-    createdAt: existing.exists() ? existing.data().createdAt ?? serverTimestamp() : serverTimestamp(),
+    createdAt: existing?.createdAt ?? serverTimestamp(),
     updatedAt: serverTimestamp()
   });
 
